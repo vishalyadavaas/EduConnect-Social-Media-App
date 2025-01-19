@@ -1,5 +1,5 @@
-import { StyleSheet, View, Text } from "react-native";
-import React from "react";
+import { StyleSheet, View, Text, FlatList } from "react-native";
+import React, { useState } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useAuth } from "../../contexts/AuthContext";
 import { useRouter } from "expo-router";
@@ -12,10 +12,18 @@ import { Alert } from "react-native";
 import { supabase } from "../../lib/supabase";
 import Avatar from "../../components/Avatar";
 import { Pressable } from "react-native";
+import { fetchPost } from "../../services/postService";
+import PostCard from "../../components/PostCard";
+import Loading from "../../components/Loading";
 
+var limit = 0;
 const Profile = () => {
   const { user, setAuth } = useAuth();
   const router = useRouter();
+
+  const [posts, setPosts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+
   const onLogout = async () => {
     setAuth(null);
     const { error } = await supabase.auth.signOut();
@@ -23,6 +31,17 @@ const Profile = () => {
       Alert.alert("Sign out failed", error.message);
     }
   };
+
+  const getPosts = async () => {
+    if (!hasMore) return null;
+    limit += 4;
+    let res = await fetchPost(limit, user.id);
+
+    if (res.success) setPosts(res.data);
+    if (posts.length == res.data.length) setHasMore(false);
+    setPosts(res.data);
+  };
+
   const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       {
@@ -38,13 +57,35 @@ const Profile = () => {
   };
   return (
     <ScreenWrapper bg={"white"}>
-      <UserHeader user={user} router={router} handleLogout={handleLogout} />
+      <FlatList
+        data={posts}
+        ListHeaderComponent={<UserHeader user={user} router={router} handleLogout={handleLogout} />}
+        ListHeaderComponentStyle={{ marginBottom: 30 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listStyle}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <PostCard item={item} currentUser={user} router={router} />
+        )}
+        onEndReached={() => getPosts()}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          hasMore ? (
+            <View style={{ marginVertical: posts.length == 0 ? 100 : 30 }}>
+              <Loading />
+            </View>
+          ) : (
+            <View style={{ marginVertical: 30 }}>
+              <Text style={styles.noPosts}>No more Posts</Text>
+            </View>
+          )
+        }
+      />
     </ScreenWrapper>
   );
 };
 
 const UserHeader = ({ user, router, handleLogout }) => {
-  
   return (
     <View
       style={{ flex: 1, backgroundColor: "white", paddingHorizontal: wp(4) }}
@@ -92,11 +133,9 @@ const UserHeader = ({ user, router, handleLogout }) => {
             </View>
           )}
 
-          {
-            user && user.bio && (
-              <Text style={styles.infoText}>{user && user.bio}</Text>
-            )
-          }
+          {user && user.bio && (
+            <Text style={styles.infoText}>{user && user.bio}</Text>
+          )}
         </View>
       </View>
     </View>
@@ -159,7 +198,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
     paddingBottom: 30,
   },
-  noPost: {
+  noPosts: {
     fontSize: hp(2),
     textAlign: "center",
     color: theme.colors.text,

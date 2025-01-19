@@ -6,7 +6,7 @@ import {
   View,Pressable,
   Alert
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import Header from "../../components/Header";
 import { hp, wp } from "../../helpers/common";
@@ -14,7 +14,7 @@ import { theme } from "../../constants/theme";
 import Avatar from "../../components/Avatar";
 import { useAuth } from "../../contexts/AuthContext";
 import RichTextEditor from "../../components/RichTextEditor";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import Icon from "../../assets/icons";
 import Button from "../../components/Button";
 import * as ImagePicker from "expo-image-picker";
@@ -24,12 +24,26 @@ import { Video ,ResizeMode} from "expo-av";
 import { createOrUpdatePost } from "../../services/postService";
 
 const NewPost = () => {
+  const post = useLocalSearchParams();
+  console.log(post);
+  
   const { user } = useAuth();
-  const boadyRef = useRef();
+  const bodyRef = useRef();
   const editorRef = useRef(null);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(file);
+
+  useEffect(() => {
+    if(post && post.id){
+      bodyRef.current = post.body;
+      setFile(post.file || null);
+      setTimeout(() => {
+        editorRef.current?.setContentHTML(post.body);
+
+      },300);
+    }
+  }, []);
 
   const onPick = async (isIamge) => {
     let mediaConfig = {
@@ -79,22 +93,23 @@ const NewPost = () => {
   }
 
   const onSubmit = async () => {
-    if(!boadyRef.current && !user) {
+    if(!bodyRef.current && !user) {
       Alert.alert("Post","Please choose a image or video");
       return;
     };
     let data = {
       file,
-      body: boadyRef.current,
+      body: bodyRef.current,
       userId: user?.id,
     }
+    if(post && post?.id) data.id = post.id;
     // create post
     setLoading(true);
     let res = await createOrUpdatePost(data);
     setLoading(false);
     if(res.success){
       setFile(null);
-      boadyRef.current = '';
+      bodyRef.current = '';
       editorRef.current?.setContentHTML('');
       router.back();
     }
@@ -105,7 +120,7 @@ const NewPost = () => {
   return (
     <ScreenWrapper bg={"white"}>
       <View style={styles.container}>
-        <Header title="Create Post" />
+        <Header title={post?.id ? "Update Post" : "Create Post"} />
         <ScrollView contentContainerStyle={{ gap: 20 }}>
           {/* avatar */}
           <View style={styles.header}>
@@ -123,7 +138,7 @@ const NewPost = () => {
           <View style={styles.textEditor}>
             <RichTextEditor
               editorRef={editorRef}
-              onChange={(body) => (boadyRef.current = body)}
+              onChange={(body) => (bodyRef.current = body)}
             />
           </View>
 
@@ -159,7 +174,8 @@ const NewPost = () => {
 
           <Button
             buttonStyle={{ height: hp(6.2) }}
-            title="Post"
+            title={post?.id ? "Update" : "Post"}
+
             loading={loading}
             hasShadow={false}
             onPress={onSubmit}

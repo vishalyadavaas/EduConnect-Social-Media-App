@@ -21,7 +21,16 @@ import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
 import Loading from "./Loading";
 
-const PostCard = ({ item, currentUser, router, hasShadow = true , showMoreIcon = true}) => {
+const PostCard = ({
+  item,
+  currentUser,
+  router,
+  hasShadow = true,
+  showMoreIcon = true,
+  showDelete = false,
+  onDelete = () => {},
+  onEdit = () => {},
+}) => {
   const shadowStyles = {
     shadowOffset: {
       width: 0,
@@ -55,12 +64,16 @@ const PostCard = ({ item, currentUser, router, hasShadow = true , showMoreIcon =
   const [likes, setLikes] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setLikes(Array.isArray(item?.postLike) ? item.postLike : []);
-  }, [item?.postLike],[item?.comments]);
+  useEffect(
+    () => {
+      setLikes(Array.isArray(item?.postLike) ? item.postLike : []);
+    },
+    [item?.postLike],
+    [item?.comments]
+  );
 
   const openPostDetails = () => {
-    if(!showMoreIcon) return null;
+    if (!showMoreIcon) return null;
     router.push({
       pathname: "/(main)/postDetails",
       params: { postId: item?.id },
@@ -130,7 +143,19 @@ const PostCard = ({ item, currentUser, router, hasShadow = true , showMoreIcon =
     }
   };
 
-  console.log("post", item?.comments?.[0].count);
+  const handlePostDelete = () => {
+    Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: () => onDelete(item),
+        style: "destructive",
+      },
+      ]);
+    };
 
   const created_at = moment(item?.created_at).format("MMM DD, YYYY");
 
@@ -154,13 +179,23 @@ const PostCard = ({ item, currentUser, router, hasShadow = true , showMoreIcon =
         </View>
         {showMoreIcon && (
           <TouchableOpacity onPress={openPostDetails}>
-          <Icon
-            name="threeDotsHorizontal"
-            size={hp(3.4)}
-            stokeWidth={3}
-            color={theme.colors.text}
-          />
-        </TouchableOpacity>
+            <Icon
+              name="threeDotsHorizontal"
+              size={hp(3.4)}
+              stokeWidth={3}
+              color={theme.colors.text}
+            />
+          </TouchableOpacity>
+        )}
+        {showDelete && currentUser?.id === item?.userId && (
+          <View style={styles.actions}>
+            <TouchableOpacity onPress={()=>onEdit(item)}>
+              <Icon name="edit" size={hp(2.5)} color={theme.colors.text} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handlePostDelete}>
+              <Icon name="delete" size={hp(2.5)} color={theme.colors.rose} />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       <View style={styles.content}>
@@ -211,9 +246,7 @@ const PostCard = ({ item, currentUser, router, hasShadow = true , showMoreIcon =
           <TouchableOpacity onPress={openPostDetails}>
             <Icon name="comment" size={24} color={theme.colors.textLight} />
           </TouchableOpacity>
-          <Text style={styles.count}>
-            {item?.comments?.[0].count || 0}
-          </Text>
+          <Text style={styles.count}>{item?.comments?.[0].count || 0}</Text>
         </View>
         <View style={styles.footerButton}>
           {loading ? (

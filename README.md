@@ -8,6 +8,8 @@ EduConnect is an Expo-powered React Native app designed to connect educators, st
 - Comment on posts in real-time
 - Manage and view media files
 - Clean and modern UI with React Native
+- Push notifications for real-time updates
+- Profile management with user details
 
 ## Getting Started
 
@@ -35,3 +37,4 @@ EduConnect is an Expo-powered React Native app designed to connect educators, st
 - **helpers**: Utility functions (stripHtmlTags)
 - **contexts**: Context providers, e.g., AuthContext
 - **constants**: Theme, color, and layout definitions
+- **assets**: Static assets like icons and images

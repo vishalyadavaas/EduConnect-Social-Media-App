@@ -1,50 +1,37 @@
-# Welcome to your Expo app 👋
+# EduConnect
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+EduConnect is an Expo-powered React Native app designed to connect educators, students, and learning resources in one place. The goal is to simplify and enhance the virtual learning experience.
 
-## Get started
+## Features
+- User authentication with Supabase
+- Create, like, and share posts
+- Comment on posts in real-time
+- Manage and view media files
+- Clean and modern UI with React Native
 
-1. Install dependencies
+## Getting Started
 
+1. **Install Dependencies**
    ```bash
    npm install
    ```
-
-2. Start the app
-
+2. **Start Development Server**
    ```bash
-    npx expo start
+   npm run start
+   ```
+3. **Build and Test for Android**
+   ```bash
+   npm run android
+   ```
+4. **Build and Test for iOS (macOS only)**
+   ```bash
+   npm run ios
    ```
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Structure
+- **app**: Entry points for Expo Router screens
+- **components**: Reusable UI components (e.g., Avatar, PostCard)
+- **services**: Supabase and API logic (postService, imageService)
+- **helpers**: Utility functions (stripHtmlTags)
+- **contexts**: Context providers, e.g., AuthContext
+- **constants**: Theme, color, and layout definitions
